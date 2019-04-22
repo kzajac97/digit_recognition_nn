@@ -51,4 +51,4 @@ if __name__ == '__main__':
         r = random.randint(0,40000)
 
         print(train_labels[r])
-        print(net(train_features)[r].argmax())
+        print(net(train_features)[r])
