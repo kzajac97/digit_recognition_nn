@@ -16,8 +16,9 @@ import random
 
 ctx = mx.cpu()
 
-train_data = pd.read_csv("Data/train.csv")
-test_data = pd.read_csv("Data/test.csv")
+data = pd.read_csv("Data/data.csv")
+train_data = data.sample(frac=0.98, random_state=200)
+test_data = data.drop(train_data.index)
 train_labels = nd.array(train_data.iloc[:,0])
 train_features = nd.array(train_data.iloc[:,1:785]) 
 
@@ -51,4 +52,4 @@ if __name__ == '__main__':
         r = random.randint(0,40000)
 
         print(train_labels[r])
-        print(net(train_features)[r])
+        print(net(train_features)[r].asnumpy().argmax())
