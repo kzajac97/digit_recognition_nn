@@ -16,6 +16,9 @@ from recognizer import *
 
 if __name__ == '__main__':
     data = pd.read_csv("Data/data.csv")
+    # split dataset into test and train
+    # train in 98% of all data and test is 
+    # remaining 2%  choosen at random 
     train_data = data.sample(frac=0.98, random_state=200)
     test_data = data.drop(train_data.index)
     train_labels = nd.array(train_data.iloc[:,0])
@@ -35,9 +38,9 @@ if __name__ == '__main__':
         loss_function = gluon.loss.SoftmaxCrossEntropyLoss()
         trainer = gluon.Trainer(deep_net.net.collect_params(),'sgd',{'learning_rate' : 0.1} )
 
-        deep_net.train(10, #num_epchos
-                        train_iter,
-                        loss_function,
+        deep_net.train(40, #num_epchos
+                        train_iter,    # Data iterator 
+                        loss_function, # Softmax
                         trainer,
                         256) #batch_size
 
@@ -47,7 +50,7 @@ if __name__ == '__main__':
         deep_net = Recognizer()
         deep_net.load_parameters('recognizer.params')
 
-    
+    # Calculate test set accuracy (~95-98%)
     accuracy = 0
     for i in range(test_labels.shape[0]):        
         if test_labels[i].asnumpy()[0] == deep_net.net(test_features)[i].asnumpy().argmax():
