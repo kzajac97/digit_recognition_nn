@@ -21,6 +21,8 @@ train_data = data.sample(frac=0.98, random_state=200)
 test_data = data.drop(train_data.index)
 train_labels = nd.array(train_data.iloc[:,0])
 train_features = nd.array(train_data.iloc[:,1:785]) 
+test_labels = nd.array(test_data.iloc[:,0])
+test_features = nd.array(test_data.iloc[:,1:785])
 
 batch_size = 256
 dataset = gluon.data.ArrayDataset(train_features,train_labels)
@@ -48,8 +50,9 @@ if __name__ == '__main__':
             loss_value.backward()
             trainer.step(batch_size)
 
-    for _ in range(10):
-        r = random.randint(0,40000)
+    accuracy = 0
+    for i in range(test_labels.shape[0]):        
+        if test_labels[i].asnumpy()[0] == net(test_features)[i].asnumpy().argmax():
+            accuracy += 1
 
-        print(train_labels[r])
-        print(net(train_features)[r].asnumpy().argmax())
+    print("Net accuracy: ",100*(accuracy/test_labels.shape[0]),"%")
