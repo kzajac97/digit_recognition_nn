@@ -32,18 +32,26 @@ class Recognizer(nn.Block):
         self.net.add(nn.Dense(10))
         self.net.initialize(init.Normal(sigma=0.01))
 
+        self.loss_values = [] # array for training visualisation
+
     # Overwrite forward pass
     def forward(self, x):
         return self.net(x)
 
     # train model
     def train(self,num_epochs,train_iter,loss_function,trainer,batch_size):
+        total_loss = 0.0
         for epoch in range(1,num_epochs+1):
             for data,label in train_iter:
                 # autograd.record() switches dropout layers on
                 with autograd.record():
                     y_hat = self.net(data)
                     loss_value = loss_function(y_hat,label).sum()
-                
+
+                total_loss += loss_value.asscalar()
                 loss_value.backward()
                 trainer.step(batch_size)
+            
+            print('epoch %d, loss %.2f' % (epoch, total_loss))
+            self.loss_values.append(total_loss)
+            total_loss = 0.0

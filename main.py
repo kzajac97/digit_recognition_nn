@@ -11,6 +11,7 @@ from mxnet import gluon
 from mxnet.gluon import nn
 from mxnet.gluon import data as gluon_data
 from mxnet.gluon import loss as gluon_loss
+import matplotlib.pyplot as plt
 
 from recognizer import *
 
@@ -26,30 +27,31 @@ if __name__ == '__main__':
     test_labels = nd.array(test_data.iloc[:,0])
     test_features = nd.array(test_data.iloc[:,1:785])
 
-    print("Train - 1, Test - 2")
-    mode = input()
-
-    if int(mode) == 1:  
-        deep_net = Recognizer()
-
-        dataset = gluon.data.ArrayDataset(train_features,train_labels)
-        train_iter = gluon.data.DataLoader(dataset,256,shuffle=True)
-        
-        loss_function = gluon.loss.SoftmaxCrossEntropyLoss()
-        trainer = gluon.Trainer(deep_net.net.collect_params(),'sgd',{'learning_rate' : 0.1} )
-
-        deep_net.train(40, #num_epchos
-                        train_iter,    # Data iterator 
-                        loss_function, # Softmax
-                        trainer,
-                        256) #batch_size
-
-        deep_net.save_parameters('recognizer.params')
-
-    elif int(mode) == 2:
+    if len(sys.argv) == 1:
         deep_net = Recognizer()
         deep_net.load_parameters('recognizer.params')
 
+    else:
+        if sys.argv[1] == 'train':  
+            deep_net = Recognizer()
+
+            dataset = gluon.data.ArrayDataset(train_features,train_labels)
+            train_iter = gluon.data.DataLoader(dataset,256,shuffle=True)
+            
+            loss_function = gluon.loss.SoftmaxCrossEntropyLoss()
+            trainer = gluon.Trainer(deep_net.net.collect_params(),'sgd',{'learning_rate' : 0.1} )
+
+            deep_net.train(10, #num_epchos
+                            train_iter,    # Data iterator 
+                            loss_function, # Softmax
+                            trainer,
+                            256) #batch_size
+          
+            deep_net.save_parameters('recognizer.params')
+
+        else:
+            print(sys.argv[1])
+        
     # Calculate test set accuracy (~95-98%)
     accuracy = 0
     for i in range(test_labels.shape[0]):        
@@ -57,3 +59,5 @@ if __name__ == '__main__':
             accuracy += 1
 
     print("Net accuracy: ",100*(accuracy/test_labels.shape[0]),"%")
+    plt.plot(deep_net.loss_values)
+    plt.show()
